@@ -1,0 +1,12 @@
+/* frontend/src/index.css */
+@import "tailwindcss";
+
+:root {
+  --color-navy: #0a0e1a;
+  --color-indigo: #4f46e5;
+}
+
+body {
+  background-color: var(--color-navy);
+  color: #e2e8f0;
+}
