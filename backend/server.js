@@ -22,25 +22,39 @@ app.use(helmet());
 app.use('/api', apiLimiter);
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
-// Make io accessible in controllers later (Week 4)
 app.set('io', io);
 
 // ── Routes ────────────────────────────────────
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', service: 'PulseOps Backend' })
 );
-
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/metrics', metricsRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  console.log('Dashboard connected:', socket.id);
+
+  // Send latest metrics immediately when client connects
+  const Metric = require('./models/Metric');
+  Metric.aggregate([
+    { $sort: { timestamp: -1 } },
+    { $group: { _id: '$host', latestMetric: { $first: '$$ROOT' } } },
+    { $replaceRoot: { newRoot: '$latestMetric' } },
+  ])
+    .then((latest) => socket.emit('metrics:initial', latest))
+    .catch((err) => console.error('Initial metrics error:', err));
+
   socket.on('disconnect', () =>
-    console.log('Client disconnected:', socket.id)
+    console.log('Dashboard disconnected:', socket.id)
   );
 });
 
@@ -49,8 +63,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
     console.log('MongoDB connected');
-    // Start background worker after DB is ready
-    await startMetricsFlushWorker();
+    await startMetricsFlushWorker(io); // pass io here
   })
   .catch((err) => console.error('MongoDB error:', err));
 

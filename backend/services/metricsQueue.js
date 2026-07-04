@@ -3,18 +3,22 @@ const { getRedisClient } = require('../utils/redisClient');
 const Metric = require('../models/Metric');
 
 const QUEUE_KEY = 'metrics:queue';
-const BATCH_SIZE = 20; // write to MongoDB in batches of 20
+const BATCH_SIZE = 20;
 
-// Push a metric to Redis queue
+let _io = null;
+
+// Call this once from server.js to give the queue access to socket.io
+const setIO = (io) => {
+  _io = io;
+};
+
 const enqueueMetric = async (metricData) => {
   const redis = await getRedisClient();
   await redis.lPush(QUEUE_KEY, JSON.stringify(metricData));
 };
 
-// Drain queue and bulk write to MongoDB
 const flushMetricsToMongo = async () => {
   const redis = await getRedisClient();
-
   const queueLength = await redis.lLen(QUEUE_KEY);
   if (queueLength === 0) return;
 
@@ -27,13 +31,18 @@ const flushMetricsToMongo = async () => {
   }
 
   if (items.length > 0) {
-    await Metric.insertMany(items);
-    console.log(`Flushed ${items.length} metrics to MongoDB`);
+    const saved = await Metric.insertMany(items);
+    console.log(`Flushed ${saved.length} metrics to MongoDB`);
+
+    // Broadcast to all connected frontend clients
+    if (_io) {
+      _io.emit('metrics:update', saved);
+    }
   }
 };
 
-// Start a background flush interval (every 3 seconds)
-const startMetricsFlushWorker = async () => {
+const startMetricsFlushWorker = async (io) => {
+  if (io) setIO(io);
   console.log('Metrics flush worker started');
   setInterval(async () => {
     try {
@@ -44,4 +53,9 @@ const startMetricsFlushWorker = async () => {
   }, 3000);
 };
 
-module.exports = { enqueueMetric, flushMetricsToMongo, startMetricsFlushWorker };
+module.exports = {
+  enqueueMetric,
+  flushMetricsToMongo,
+  startMetricsFlushWorker,
+  setIO,
+};
