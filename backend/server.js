@@ -12,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
 const { apiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const { startMetricsFlushWorker } = require('./services/metricsQueue');
+const incidentRoutes = require('./routes/incidentRoutes');
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get('/health', (req, res) =>
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/incidents', incidentRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
