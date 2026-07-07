@@ -1,16 +1,14 @@
 // backend/services/metricsQueue.js
-const { getRedisClient } = require('../utils/redisClient');
-const Metric = require('../models/Metric');
+const { getRedisClient }    = require('../utils/redisClient');
+const Metric                = require('../models/Metric');
+const { evaluateMetrics }   = require('./alertEngine');
 
-const QUEUE_KEY = 'metrics:queue';
+const QUEUE_KEY  = 'metrics:queue';
 const BATCH_SIZE = 20;
 
 let _io = null;
 
-// Call this once from server.js to give the queue access to socket.io
-const setIO = (io) => {
-  _io = io;
-};
+const setIO = (io) => { _io = io; };
 
 const enqueueMetric = async (metricData) => {
   const redis = await getRedisClient();
@@ -23,7 +21,7 @@ const flushMetricsToMongo = async () => {
   if (queueLength === 0) return;
 
   const toProcess = Math.min(queueLength, BATCH_SIZE);
-  const items = [];
+  const items     = [];
 
   for (let i = 0; i < toProcess; i++) {
     const item = await redis.rPop(QUEUE_KEY);
@@ -34,10 +32,11 @@ const flushMetricsToMongo = async () => {
     const saved = await Metric.insertMany(items);
     console.log(`Flushed ${saved.length} metrics to MongoDB`);
 
-    // Broadcast to all connected frontend clients
-    if (_io) {
-      _io.emit('metrics:update', saved);
-    }
+    // Broadcast live metrics to dashboard
+    if (_io) _io.emit('metrics:update', saved);
+
+    // ── Evaluate alert rules against flushed metrics ──
+    await evaluateMetrics(saved);
   }
 };
 

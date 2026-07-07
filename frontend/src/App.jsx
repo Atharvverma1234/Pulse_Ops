@@ -1,13 +1,14 @@
 // frontend/src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider }    from './context/AuthContext';
-import ProtectedRoute      from './components/ProtectedRoute';
-import AppLayout           from './components/AppLayout';
-import Login               from './pages/Login';
-import Register            from './pages/Register';
-import Dashboard           from './pages/dashboard/Dashboard';
-import IncidentList        from './pages/incidents/IncidentList';
-import IncidentDetail      from './pages/incidents/IncidentDetail';
+import { AuthProvider }  from './context/AuthContext';
+import ProtectedRoute    from './components/ProtectedRoute';
+import AppLayout         from './components/AppLayout';
+import Login             from './pages/Login';
+import Register          from './pages/Register';
+import Dashboard         from './pages/dashboard/Dashboard';
+import IncidentList      from './pages/incidents/IncidentList';
+import IncidentDetail    from './pages/incidents/IncidentDetail';
+import AlertList         from './pages/alerts/AlertList';      // ← add
 
 function AppWithLayout({ children }) {
   return (
@@ -36,6 +37,10 @@ export default function App() {
           <Route
             path="/incidents/:id"
             element={<AppWithLayout><IncidentDetail /></AppWithLayout>}
+          />
+          <Route
+            path="/alerts"
+            element={<AppWithLayout><AlertList /></AppWithLayout>}   // ← add
           />
         </Routes>
       </AuthProvider>

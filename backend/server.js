@@ -13,6 +13,8 @@ const metricsRoutes = require('./routes/metricsRoutes');
 const { apiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const { startMetricsFlushWorker } = require('./services/metricsQueue');
 const incidentRoutes = require('./routes/incidentRoutes');
+const { setIO: setAlertIO } = require('./services/alertEngine');
+const alertRoutes = require('./routes/alertRoutes');
 
 dotenv.config();
 
@@ -40,6 +42,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/incidents', incidentRoutes);
+app.use('/api/alerts', alertRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
@@ -65,6 +68,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
     console.log('MongoDB connected');
+    setAlertIO(io);  
     await startMetricsFlushWorker(io); // pass io here
   })
   .catch((err) => console.error('MongoDB error:', err));

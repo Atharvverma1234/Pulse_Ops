@@ -2,10 +2,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Badge from './ui/Badge';
+import AlertToast from './alerts/AlertToast';
 
 const navItems = [
   { path: '/dashboard',  label: 'Dashboard',  icon: '◉' },
   { path: '/incidents',  label: 'Incidents',   icon: '⚠' },
+  { path: '/alerts',    label: 'Alerts',     icon: '🔔' },
 ];
 
 export default function AppLayout({ children }) {
@@ -62,6 +64,7 @@ export default function AppLayout({ children }) {
       <div className="flex flex-1 overflow-hidden">
         {children}
       </div>
+      <AlertToast />
     </div>
   );
 }
