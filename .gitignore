@@ -37,5 +37,12 @@ desktop.ini
 *.swp
 
 # ── AI Models (too large for Git) ─────────────
+
+# AI model artifacts (regenerate via train_model.py)
 ai-service/models/*.pkl
 ai-service/models/*.joblib
+ai-service/models/threshold.txt
+ai-service/models/model_meta.json
+
+# Keep the models directory itself
+!ai-service/models/.gitkeep

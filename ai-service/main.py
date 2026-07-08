@@ -1,24 +1,41 @@
 # ai-service/main.py
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+from fastapi              import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers              import predict, train, status
+import os
 
-app = FastAPI(title="PulseOps AI Service")
+app = FastAPI(
+    title       = 'PulseOps AI Service',
+    description = 'Isolation Forest anomaly detection for infrastructure metrics',
+    version     = '1.0.0',
+)
 
-class MetricInput(BaseModel):
-    features: List[float]  # [cpu, memory, disk, network]
+# CORS — allow Node backend to call this service
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins  = ['*'],
+    allow_methods  = ['*'],
+    allow_headers  = ['*'],
+)
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "service": "PulseOps AI"}
+# ── Routers ───────────────────────────────────
+app.include_router(status.router,  tags=['Health'])
+app.include_router(predict.router, tags=['Prediction'])
+app.include_router(train.router,   tags=['Training'])
 
-@app.post("/predict")
-def predict(input: MetricInput):
-    # Placeholder logic until Week 7 when Isolation Forest is trained
-    avg = sum(input.features) / len(input.features)
-    is_anomaly = avg > 80
+# ── Root ──────────────────────────────────────
+@app.get('/')
+def root():
     return {
-        "anomaly_score": round(avg, 2),
-        "is_anomaly": is_anomaly,
-        "severity": "high" if avg > 90 else "medium" if avg > 80 else "normal"
+        'service':   'PulseOps AI',
+        'version':   '1.0.0',
+        'endpoints': [
+            'GET  /health',
+            'GET  /model/status',
+            'POST /predict',
+            'POST /predict/bulk',
+            'POST /train',
+            'GET  /train/status',
+            'GET  /docs',
+        ],
     }

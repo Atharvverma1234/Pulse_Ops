@@ -62,7 +62,9 @@ services:
     env_file:
       - ./ai-service/.env
     volumes:
-      - ./ai-service:/app
+      - ./ai-service:/app          # hot reload for code changes
+      - ./ai-service/models:/app/models  # persist trained models
+      - ./ai-service/data:/app/data      # persist datasets
     networks:
       - pulseops-net
 
