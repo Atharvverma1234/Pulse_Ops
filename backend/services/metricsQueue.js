@@ -1,7 +1,8 @@
 // backend/services/metricsQueue.js
-const { getRedisClient }    = require('../utils/redisClient');
-const Metric                = require('../models/Metric');
-const { evaluateMetrics }   = require('./alertEngine');
+const { getRedisClient }   = require('../utils/redisClient');
+const Metric               = require('../models/Metric');
+const { evaluateMetrics }  = require('./alertEngine');
+const { processAnomalies } = require('./anomalyProcessor');
 
 const QUEUE_KEY  = 'metrics:queue';
 const BATCH_SIZE = 20;
@@ -32,11 +33,14 @@ const flushMetricsToMongo = async () => {
     const saved = await Metric.insertMany(items);
     console.log(`Flushed ${saved.length} metrics to MongoDB`);
 
-    // Broadcast live metrics to dashboard
+    // Broadcast raw metrics to dashboard
     if (_io) _io.emit('metrics:update', saved);
 
-    // ── Evaluate alert rules against flushed metrics ──
-    await evaluateMetrics(saved);
+    // Run in parallel — alert engine + AI anomaly detection
+    await Promise.allSettled([
+      evaluateMetrics(saved),
+      processAnomalies(saved),
+    ]);
   }
 };
 

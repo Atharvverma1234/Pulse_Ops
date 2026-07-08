@@ -1,12 +1,13 @@
 // frontend/src/components/dashboard/HostCard.jsx
-import MetricChart from './MetricChart';
-import StatsBar from './StatsBar';
-import Badge from '../ui/Badge';
+import MetricChart    from './MetricChart';
+import StatsBar       from './StatsBar';
+import Badge          from '../ui/Badge';
+import RiskScoreBadge from '../ai/RiskScoreBadge';
 
 const getStatusColor = (cpu, memory) => {
-  if (cpu >= 90 || memory >= 90) return { label: 'Critical', color: 'red' };
+  if (cpu >= 90 || memory >= 90) return { label: 'Critical', color: 'red'   };
   if (cpu >= 75 || memory >= 75) return { label: 'Warning',  color: 'yellow' };
-  return                                 { label: 'Healthy',  color: 'green' };
+  return                                 { label: 'Healthy',  color: 'green'  };
 };
 
 const formatTime = (ts) => {
@@ -14,7 +15,7 @@ const formatTime = (ts) => {
   return new Date(ts).toLocaleTimeString();
 };
 
-export default function HostCard({ host, latest, history }) {
+export default function HostCard({ host, latest, history, risk }) {
   if (!latest) return null;
 
   const status = getStatusColor(latest.cpu, latest.memory);
@@ -30,8 +31,24 @@ export default function HostCard({ host, latest, history }) {
             {latest.service || 'system'} · Last seen {formatTime(latest.timestamp)}
           </p>
         </div>
-        <Badge label={status.label} color={status.color} />
+        <div className="flex items-center gap-2">
+          <Badge label={status.label} color={status.color} />
+          {/* AI risk score ring */}
+          {risk && (
+            <RiskScoreBadge score={risk.score} size="sm" />
+          )}
+        </div>
       </div>
+
+      {/* AI anomaly banner */}
+      {risk?.isAnomaly && (
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
+          <span className="text-red-400 text-sm">⚠</span>
+          <p className="text-red-400 text-xs font-medium">
+            AI detected anomaly · Score {(risk.score * 100).toFixed(0)}
+          </p>
+        </div>
+      )}
 
       {/* Stats bars */}
       <div className="flex flex-col gap-3">
@@ -42,20 +59,23 @@ export default function HostCard({ host, latest, history }) {
 
       {/* Network */}
       <div className="flex gap-4 text-xs text-slate-500 border-t border-indigo-900/30 pt-3">
-        <span>↓ {((latest.network?.in || 0) / 1024).toFixed(1)} KB/s</span>
+        <span>↓ {((latest.network?.in  || 0) / 1024).toFixed(1)} KB/s</span>
         <span>↑ {((latest.network?.out || 0) / 1024).toFixed(1)} KB/s</span>
+        {risk && (
+          <span className="ml-auto text-slate-600">
+            AI risk: <span className="text-slate-400">{risk.riskLevel}</span>
+          </span>
+        )}
       </div>
 
       {/* Charts */}
-      {history.length > 1 && (
+      {history.length > 1 ? (
         <div className="grid grid-cols-1 gap-3">
           <MetricChart data={history} metricKey="cpu"    label="CPU History"    />
           <MetricChart data={history} metricKey="memory" label="Memory History" />
           <MetricChart data={history} metricKey="disk"   label="Disk History"   />
         </div>
-      )}
-
-      {history.length <= 1 && (
+      ) : (
         <p className="text-slate-600 text-xs text-center py-2">
           Collecting chart data...
         </p>

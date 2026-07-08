@@ -8,6 +8,7 @@ const navItems = [
   { path: '/dashboard',  label: 'Dashboard',  icon: '◉' },
   { path: '/incidents',  label: 'Incidents',   icon: '⚠' },
   { path: '/alerts',    label: 'Alerts',     icon: '🔔' },
+  { path: '/ai',        label: 'AI Intelligence', icon: '🧠' },
 ];
 
 export default function AppLayout({ children }) {

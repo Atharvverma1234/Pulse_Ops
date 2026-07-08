@@ -1,14 +1,16 @@
 // frontend/src/pages/dashboard/Dashboard.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useMetrics from '../../hooks/useMetrics';
-import HostCard   from '../../components/dashboard/HostCard';
-import HostList   from '../../components/dashboard/HostList';
-import Spinner    from '../../components/ui/Spinner';
+import { useState }     from 'react';
+import { useNavigate }  from 'react-router-dom';
+import useMetrics       from '../../hooks/useMetrics';
+import useRiskScores    from '../../hooks/useRiskScores';
+import HostCard         from '../../components/dashboard/HostCard';
+import HostList         from '../../components/dashboard/HostList';
+import Spinner          from '../../components/ui/Spinner';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { hosts, getLatest, getHistory, connected, lastUpdated } = useMetrics();
+  const { getRisk } = useRiskScores();
   const [selectedHost, setSelectedHost] = useState(null);
 
   const displayedHosts = selectedHost ? [selectedHost] : hosts;
@@ -19,7 +21,6 @@ export default function Dashboard() {
       {/* ── Sidebar ── */}
       <aside className="w-56 flex-shrink-0 bg-[#0a0e1a] border-r border-indigo-900/40 p-4 flex flex-col gap-4 overflow-y-auto">
 
-        {/* Live indicator */}
         <div className="flex items-center gap-2 px-1">
           <span
             className={`w-2 h-2 rounded-full flex-shrink-0 ${
@@ -32,15 +33,12 @@ export default function Dashboard() {
           {lastUpdated && (
             <span className="text-xs text-slate-700 ml-auto">
               {lastUpdated.toLocaleTimeString([], {
-                hour:   '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
               })}
             </span>
           )}
         </div>
 
-        {/* Host list */}
         <div className="flex-1">
           <p className="text-slate-500 text-xs uppercase tracking-widest mb-3">
             Hosts ({hosts.length})
@@ -55,14 +53,18 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Bottom shortcut */}
-        <div className="border-t border-indigo-900/30 pt-4">
+        <div className="border-t border-indigo-900/30 pt-4 flex flex-col gap-1">
           <button
             onClick={() => navigate('/incidents')}
             className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-slate-500 hover:text-white hover:bg-indigo-900/20 text-sm transition-colors"
           >
-            <span>⚠</span>
-            View Incidents
+            <span>⚠</span> View Incidents
+          </button>
+          <button
+            onClick={() => navigate('/ai')}
+            className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-slate-500 hover:text-white hover:bg-indigo-900/20 text-sm transition-colors"
+          >
+            <span>🧠</span> AI Intelligence
           </button>
         </div>
       </aside>
@@ -70,7 +72,6 @@ export default function Dashboard() {
       {/* ── Main Content ── */}
       <main className="flex-1 overflow-y-auto p-6">
 
-        {/* Summary strip */}
         {hosts.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             <SummaryCard
@@ -87,7 +88,7 @@ export default function Dashboard() {
                 }).length
               }
               color="text-red-400"
-              onClick={() => navigate('/incidents?severity=critical')}
+              onClick={() => navigate('/incidents')}
             />
             <SummaryCard
               label="Warning"
@@ -97,27 +98,23 @@ export default function Dashboard() {
                   return (
                     l &&
                     (l.cpu >= 75 || l.memory >= 75) &&
-                    l.cpu < 90 &&
-                    l.memory < 90
+                    l.cpu < 90 && l.memory < 90
                   );
                 }).length
               }
               color="text-yellow-400"
             />
             <SummaryCard
-              label="Healthy"
+              label="AI Anomalies"
               value={
-                hosts.filter((h) => {
-                  const l = getLatest(h);
-                  return l && l.cpu < 75 && l.memory < 75;
-                }).length
+                hosts.filter((h) => getRisk(h)?.isAnomaly).length
               }
-              color="text-green-400"
+              color="text-orange-400"
+              onClick={() => navigate('/ai')}
             />
           </div>
         )}
 
-        {/* No data yet */}
         {hosts.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
             <Spinner size="lg" />
@@ -128,7 +125,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Host cards grid */}
         {displayedHosts.length > 0 && (
           <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-5">
             {displayedHosts.map((host) => (
@@ -137,6 +133,7 @@ export default function Dashboard() {
                 host={host}
                 latest={getLatest(host)}
                 history={getHistory(host)}
+                risk={getRisk(host)}
               />
             ))}
           </div>
@@ -146,7 +143,6 @@ export default function Dashboard() {
   );
 }
 
-// ── Summary card ──────────────────────────────
 function SummaryCard({ label, value, color, onClick }) {
   return (
     <div

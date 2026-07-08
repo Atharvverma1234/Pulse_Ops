@@ -15,6 +15,8 @@ const { startMetricsFlushWorker } = require('./services/metricsQueue');
 const incidentRoutes = require('./routes/incidentRoutes');
 const { setIO: setAlertIO } = require('./services/alertEngine');
 const alertRoutes = require('./routes/alertRoutes');
+const { setIO: setAnomalyIO } = require('./services/anomalyProcessor');
+const aiRoutes = require('./routes/aiRoutes');
 
 dotenv.config();
 
@@ -43,6 +45,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/alerts', alertRoutes);
+app.use('/api/ai', aiRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
@@ -69,6 +72,7 @@ mongoose
   .then(async () => {
     console.log('MongoDB connected');
     setAlertIO(io);  
+    setAnomalyIO(io);
     await startMetricsFlushWorker(io); // pass io here
   })
   .catch((err) => console.error('MongoDB error:', err));
