@@ -1,10 +1,11 @@
 // frontend/src/pages/incidents/IncidentList.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useIncidents        from '../../hooks/useIncidents';
 import IncidentRow         from '../../components/incidents/IncidentRow';
 import IncidentFilters     from '../../components/incidents/IncidentFilters';
 import CreateIncidentModal from '../../components/incidents/CreateIncidentModal';
 import Spinner             from '../../components/ui/Spinner';
+import api from '../../utils/api';
 
 export default function IncidentList() {
   const {
@@ -14,6 +15,13 @@ export default function IncidentList() {
   } = useIncidents();
 
   const [showModal, setShowModal] = useState(false);
+  const [rcaStats, setRcaStats] = useState(null);
+
+  useEffect(() => {
+    api.get('/rca/stats')
+      .then((res) => setRcaStats(res.data.data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
@@ -27,6 +35,17 @@ export default function IncidentList() {
           <StatCard label="Resolved"       value={stats.byStatus?.resolved || 0}  color="text-green-400"  />
         </div>
       )}
+      {rcaStats && (
+  <div className="bg-[#0a0e1a] border border-indigo-900/40 rounded-xl px-4 py-3">
+    <p className="text-slate-500 text-xs mb-1">RCA Coverage</p>
+    <p className="text-2xl font-bold text-indigo-400">
+      {rcaStats.coverage}%
+    </p>
+    <p className="text-slate-600 text-xs mt-0.5">
+      {rcaStats.withRCA}/{rcaStats.total} incidents
+    </p>
+  </div>
+)}
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">

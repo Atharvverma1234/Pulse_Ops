@@ -7,6 +7,27 @@ const timelineEntrySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Add this schema inside Incident.js before the main incidentSchema
+
+const rcaSchema = new mongoose.Schema({
+  summary:          { type: String, default: '' },
+  rootCause:        { type: String, default: '' },
+  impact:           { type: String, default: '' },
+  recommendations:  [{ type: String }],
+  confidence:       {
+    type:    String,
+    enum:    ['high', 'medium', 'low'],
+    default: 'low',
+  },
+  confidenceReason: { type: String, default: '' },
+  generatedAt:      { type: Date },
+  context: {
+    metricStats:  { type: mongoose.Schema.Types.Mixed },
+    alertCount:   { type: Number },
+    metricCount:  { type: Number },
+  },
+}, { _id: false });
+
 const incidentSchema = new mongoose.Schema(
   {
     title: {
@@ -47,8 +68,10 @@ const incidentSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    rca:            { type: rcaSchema, default: null },
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.model('Incident', incidentSchema);

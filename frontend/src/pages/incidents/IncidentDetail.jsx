@@ -6,6 +6,7 @@ import SeverityBadge    from '../../components/incidents/SeverityBadge';
 import StatusBadge      from '../../components/incidents/StatusBadge';
 import Spinner          from '../../components/ui/Spinner';
 import { formatDate, timeAgo } from '../../utils/incidentUtils';
+import RCAPanel from '../../components/rca/RCAPanel';
 
 export default function IncidentDetail() {
   const { id }       = useParams();
@@ -15,11 +16,13 @@ export default function IncidentDetail() {
   const [note,       setNote]       = useState('');
   const [noteLoading,setNoteLoading]= useState(false);
   const [updating,   setUpdating]   = useState(false);
+  const [rca, setRCA] = useState(null);
 
   const fetchIncident = async () => {
     try {
       const res = await api.get(`/incidents/${id}`);
       setIncident(res.data.data);
+      setRCA(res.data.data.rca || null);
     } catch (err) {
       console.error(err);
     } finally {
@@ -211,6 +214,12 @@ export default function IncidentDetail() {
               ))}
             </div>
           </div>
+          {/* RCA Panel */}
+          <RCAPanel
+             incidentId={id}
+             existingRCA={rca}
+             onRCAGenerated={(newRCA) => setRCA(newRCA)}
+            />
         </div>
 
         {/* Sidebar metadata */}

@@ -18,6 +18,7 @@ const alertRoutes = require('./routes/alertRoutes');
 const { setIO: setAnomalyIO } = require('./services/anomalyProcessor');
 const aiRoutes = require('./routes/aiRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const rcaRoutes = require('./routes/rcaRoutes');
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/incidents', incidentRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/rca', rcaRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
