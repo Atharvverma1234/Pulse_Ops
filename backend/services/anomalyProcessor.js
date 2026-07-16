@@ -2,6 +2,7 @@
 const Metric   = require('../models/Metric');
 const Incident = require('../models/Incident');
 const { predictAnomalyBulk } = require('../utils/aiClient');
+const { onAnomalyDetected } = require('./webhookService');
 
 let _io = null;
 
@@ -94,6 +95,9 @@ const processAnomalies = async (savedMetrics) => {
       );
     }
   }
+  // Fire n8n webhook for anomaly
+onAnomalyDetected(metric, aiScore.anomaly_score, aiScore.severity)
+  .catch((e) => console.error('[Webhook] anomaly error:', e.message));
 
   // Bulk update metric documents with AI scores
   if (updates.length > 0) {

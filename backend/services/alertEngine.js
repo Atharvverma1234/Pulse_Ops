@@ -5,6 +5,7 @@ const Incident     = require('../models/Incident');
 const { isOnCooldown, markFired } = require('./alertCooldown');
 const { sendSlackNotification }   = require('./notificationService');
 const { sendEmailNotification }   = require('./notificationService');
+const { onCriticalAlert, onHighAlert } = require('./webhookService');
 
 let _io = null;
 
@@ -70,7 +71,16 @@ const handleBreach = async (metric, rule, value) => {
       sendSlackNotification({ alert, incident, message, rule }),
       sendEmailNotification({ alert, incident, message, rule }),
     ]);
-
+    // Fire n8n webhook
+if (rule.severity === 'critical') {
+  onCriticalAlert(alert, incident).catch((e) =>
+    console.error('[Webhook] critical alert error:', e.message)
+  );
+} else if (rule.severity === 'high') {
+  onHighAlert(alert, incident).catch((e) =>
+    console.error('[Webhook] high alert error:', e.message)
+  );
+}
     // 4. Broadcast to dashboard
     if (_io) {
       _io.emit('alert:fired', { alert, incident });

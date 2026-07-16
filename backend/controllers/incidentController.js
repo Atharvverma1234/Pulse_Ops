@@ -1,6 +1,12 @@
 // backend/controllers/incidentController.js
 const Incident = require('../models/Incident');
 
+const {
+  onIncidentCreated,
+  onIncidentUpdated,
+  onIncidentResolved,
+} = require('../services/webhookService');
+
 // ── Create Incident ───────────────────────────
 const createIncident = async (req, res) => {
   try {
@@ -37,6 +43,11 @@ const createIncident = async (req, res) => {
     // Broadcast to dashboard via socket.io
     const io = req.app.get('io');
     if (io) io.emit('incident:created', incident);
+
+    // Fire webhook (non-blocking)
+onIncidentCreated(incident).catch((e) =>
+  console.error('[Webhook] incident created error:', e.message)
+);
 
     res.status(201).json({ message: 'Incident created', data: incident });
   } catch (error) {
@@ -151,6 +162,16 @@ const updateIncident = async (req, res) => {
 
     const io = req.app.get('io');
     if (io) io.emit('incident:updated', incident);
+    // Fire webhook based on new status
+if (incident.status === 'resolved') {
+  onIncidentResolved(incident).catch((e) =>
+    console.error('[Webhook] incident resolved error:', e.message)
+  );
+} else {
+  onIncidentUpdated(incident).catch((e) =>
+    console.error('[Webhook] incident updated error:', e.message)
+  );
+}
 
     res.status(200).json({ message: 'Incident updated', data: incident });
   } catch (error) {
