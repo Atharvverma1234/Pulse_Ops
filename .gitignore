@@ -46,3 +46,7 @@ ai-service/models/model_meta.json
 
 # Keep the models directory itself
 !ai-service/models/.gitkeep
+
+# Production env files
+*.env.production
+*.env.staging
