@@ -33,9 +33,6 @@ services:
     depends_on:
       - mongo
       - redis
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     networks:
       - pulseops-net
 

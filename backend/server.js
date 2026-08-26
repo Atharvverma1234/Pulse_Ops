@@ -26,7 +26,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
-app.use('/api', apiLimiter);
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -43,13 +42,16 @@ app.get('/health', (req, res) =>
   res.json({ status: 'ok', service: 'PulseOps Backend' })
 );
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/users', userRoutes);
+
+app.use('/api/users', apiLimiter, userRoutes);
+
 app.use('/api/metrics', metricsRoutes);
-app.use('/api/incidents', incidentRoutes);
-app.use('/api/alerts', alertRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/webhooks', webhookRoutes);
-app.use('/api/rca', rcaRoutes);
+
+app.use('/api/incidents', apiLimiter, incidentRoutes);
+app.use('/api/alerts', apiLimiter, alertRoutes);
+app.use('/api/ai', apiLimiter, aiRoutes);
+app.use('/api/webhooks', apiLimiter, webhookRoutes);
+app.use('/api/rca', apiLimiter, rcaRoutes);
 
 // ── Socket.IO ─────────────────────────────────
 io.on('connection', (socket) => {
