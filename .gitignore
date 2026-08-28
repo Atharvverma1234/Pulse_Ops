@@ -50,3 +50,6 @@ ai-service/models/model_meta.json
 # Production env files
 *.env.production
 *.env.staging
+
+frontend/.env.production
+frontend/.env.development

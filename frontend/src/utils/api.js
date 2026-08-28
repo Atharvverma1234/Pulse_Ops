@@ -1,11 +1,14 @@
 // frontend/src/utils/api.js
 import axios from 'axios';
 
+// In production: served by Nginx which proxies /api/ to backend
+// In development: backend is on localhost:5000
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: BASE_URL,
 });
 
-// Attach token to every request automatically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -14,7 +17,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally (token expired)
 api.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -1,8 +1,6 @@
-
-
 services:
 
-  # ── Database ──────────────────────────────────
+  # ── Database ─────────────────────────────────────────────
   mongo:
     image: mongo:7
     container_name: pulseops-mongo
@@ -13,7 +11,7 @@ services:
     networks:
       - pulseops-net
 
-  # ── Cache / Queue ─────────────────────────────
+  # ── Cache / Queue ───────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: pulseops-redis
@@ -22,7 +20,7 @@ services:
     networks:
       - pulseops-net
 
-  # ── Backend ───────────────────────────────────
+  # ── Backend ─────────────────────────────────────────────
   backend:
     build: ./backend
     container_name: pulseops-backend
@@ -33,10 +31,16 @@ services:
     depends_on:
       - mongo
       - redis
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     networks:
       - pulseops-net
 
-  # ── Frontend ──────────────────────────────────
+  # ── Frontend ────────────────────────────────────────────
   frontend:
     build: ./frontend
     container_name: pulseops-frontend
@@ -50,7 +54,7 @@ services:
     networks:
       - pulseops-net
 
-  # ── AI Service ────────────────────────────────
+  # ── AI Service ──────────────────────────────────────────
   ai-service:
     build: ./ai-service
     container_name: pulseops-ai
@@ -59,13 +63,13 @@ services:
     env_file:
       - ./ai-service/.env
     volumes:
-      - ./ai-service:/app          # hot reload for code changes
-      - ./ai-service/models:/app/models  # persist trained models
-      - ./ai-service/data:/app/data      # persist datasets
+      - ./ai-service:/app
+      - ./ai-service/models:/app/models
+      - ./ai-service/data:/app/data
     networks:
       - pulseops-net
 
-  # ── Nginx Reverse Proxy ───────────────────────
+  # ── Nginx Reverse Proxy ────────────────────────────────
   nginx:
     image: nginx:alpine
     container_name: pulseops-nginx
@@ -80,6 +84,7 @@ services:
     networks:
       - pulseops-net
 
+  # ── n8n ─────────────────────────────────────────────────
   n8n:
     image: n8nio/n8n:latest
     container_name: pulseops-n8n
@@ -97,8 +102,8 @@ services:
       - N8N_LOG_LEVEL=info
       - NODE_TLS_REJECT_UNAUTHORIZED=0
     dns:
-      - 8.8.8.8                          
-      - 8.8.4.4                          
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       - n8n-data:/home/node/.n8n
     networks:
@@ -108,7 +113,7 @@ services:
 
 volumes:
   mongo-data:
-  n8n-data:        # ← add this
+  n8n-data:
 
 networks:
   pulseops-net:
