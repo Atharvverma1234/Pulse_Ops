@@ -1133,12 +1133,10 @@ The goal isn't simply to generate more alerts.
 Electrical & Electronics Engineering Student
 Dayananda Sagar College of Engineering, Bengaluru
 
-<br/><br/>
-
+<br/>
 <a href="https://github.com/Atharvverma1234">
   <img src="https://img.shields.io/badge/GitHub-Atharvverma1234-181717?style=for-the-badge&logo=github" />
 </a>
-
 </p>
 
 ---
