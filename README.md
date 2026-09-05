@@ -169,7 +169,8 @@ to:
 
 > Real-time infrastructure visibility with anomaly scores, host health, alerts and incident activity.
 
-**Recommended screenshot:** `docs/screenshots/dashboard.png`
+<img width="1917" height="1078" alt="Screenshot 2026-08-27 005557" src="https://github.com/user-attachments/assets/b6418d63-d883-4f8f-a753-de449f851c93" />
+
 
 ---
 
@@ -186,15 +187,16 @@ Track incidents from initial detection through investigation and resolution.
 │ Status         INVESTIGATING                             │
 │ Anomaly Score  0.94                                      │
 │                                                          │
-│ Timeline                                                   │
+│ Timeline                                                 │
 │                                                          │
-│  14:21  Anomaly detected                                │
-│  14:22  Incident automatically created                  │
-│  14:22  Risk score calculated                           │
-│  14:23  AI RCA generated                                │
-│  14:24  Slack escalation triggered                      │
+│  14:21  Anomaly detected                                 │
+│  14:22  Incident automatically created                   │
+│  14:22  Risk score calculated                            │
+│  14:23  AI RCA generated                                 │
+│  14:24  Slack escalation triggered                       │
 └──────────────────────────────────────────────────────────┘
 ```
+<img width="1917" height="1077" alt="Screenshot 2026-08-27 005741" src="https://github.com/user-attachments/assets/d22cfb55-f54e-4553-bbed-06fcf0fac967" />
 
 ---
 
@@ -207,23 +209,24 @@ PulseOps converts raw telemetry into an engineering-friendly explanation.
 │ AI ROOT CAUSE ANALYSIS                                   │
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
-│ Root Cause                                                │
-│ Elevated CPU utilization combined with abnormal         │
-│ memory pressure on server-02.                           │
+│ Root Cause                                               │
+│ Elevated CPU utilization combined with abnormal          │
+│ memory pressure on server-02.                            │
 │                                                          │
-│ Confidence                                                │
+│ Confidence                                               │
 │ High                                                     │
 │                                                          │
-│ Impact                                                    │
+│ Impact                                                   │
 │ Increased request latency and potential service          │
 │ degradation.                                             │
 │                                                          │
 │ Recommended Action                                       │
 │ Investigate high-consumption processes and evaluate      │
-│ recent deployments on the affected host.                │
+│ recent deployments on the affected host.                 │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```
+<img width="1901" height="1078" alt="Screenshot 2026-08-29 000328" src="https://github.com/user-attachments/assets/4ca9acc3-07b4-4e1f-8fc8-735f388e47a8" />
 
 ---
 
@@ -266,8 +269,8 @@ PulseOps converts raw telemetry into an engineering-friendly explanation.
                               └──────────┬──────────┘
                                          │
                               ┌──────────▼──────────┐
-                              │      Groq LLM        │
-                              │ Root Cause Analysis  │
+                              │      Groq LLM       │
+                              │ Root Cause Analysis │
                               └─────────────────────┘
 ```
 
@@ -377,7 +380,7 @@ PulseOps
    ↓
 Webhook
    ↓
-n8n
+  n8n
  ┌─┴──────┬─────────┐
  ↓        ↓         ↓
 Slack  Telegram   Email
@@ -431,7 +434,7 @@ Anomaly Detection
     ↓
 Incident Context
     ↓
-LLM
+   LLM
     ↓
 ┌───────────────────────┐
 │ Root Cause            │
@@ -843,10 +846,10 @@ PulseOps is designed as a multi-service containerized system.
        │             ┌────┴────┐             │
        │             │         │             │
        │          MongoDB    Redis           │
-       │                                      │
-       └──────────────────┬───────────────────┘
+       │                                     │
+       └──────────────────┬──────────────────┘
                           │
-                         Nginx
+                        Nginx
                           │
                         Client
 ```
@@ -1000,9 +1003,9 @@ PulseOps brings together four traditionally separate layers:
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│                    OBSERVABILITY                         │
+│                    OBSERVABILITY                        │
 │                                                         │
-│  Metrics ───────► AI Detection ───────► Risk           │
+│  Metrics ───────► AI Detection ───────► Risk            │
 │                                             │           │
 │                                             ▼           │
 │                                        Incident         │
@@ -1013,8 +1016,8 @@ PulseOps brings together four traditionally separate layers:
 │                                             ▼           │
 │                                        Automation       │
 │                                             │           │
-│                                    ┌────────┼────────┐   │
-│                                    ▼        ▼        ▼   │
+│                                    ┌────────┼────────┐  │
+│                                    ▼        ▼        ▼  │
 │                                  Slack  Telegram  Email │
 └─────────────────────────────────────────────────────────┘
 ```
